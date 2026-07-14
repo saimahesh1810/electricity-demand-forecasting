@@ -1,0 +1,40 @@
+# Virtual environment
+.venv/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+
+# Raw and generated data
+data/raw/*
+data/interim/*
+data/processed/*
+!data/raw/.gitkeep
+!data/interim/.gitkeep
+!data/processed/.gitkeep
+
+# Generated outputs
+outputs/figures/*
+outputs/forecasts/*
+outputs/metrics/*
+outputs/model_objects/*
+!outputs/figures/.gitkeep
+!outputs/forecasts/.gitkeep
+!outputs/metrics/.gitkeep
+!outputs/model_objects/.gitkeep
+
+# Jupyter and IDE
+.ipynb_checkpoints/
+.vscode/
+
+# Model objects
+*.pkl
+*.joblib
+*.keras
+*.h5
+
+# Operating-system files
+Thumbs.db
+.DS_Store
