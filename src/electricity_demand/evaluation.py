@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import numpy as np
 import pandas as pd
+from statsmodels.tsa.stattools import adfuller
 
 
 def mean_absolute_error(
@@ -223,4 +224,68 @@ def evaluate_forecast(
             actual,
             predicted,
         ),
+    }
+
+def augmented_dickey_fuller_test(
+    series: pd.Series,
+    significance_level: float = 0.05,
+) -> dict[str, float | int | bool]:
+    """
+    Perform the Augmented Dickey-Fuller stationarity test.
+
+    The null hypothesis is that the series contains a unit root and is
+    therefore non-stationary.
+
+    Parameters
+    ----------
+    series:
+        Time series to test.
+
+    significance_level:
+        Threshold used to reject the null hypothesis.
+
+    Returns
+    -------
+    dict
+        Test statistic, p-value, lag information, critical values and
+        stationarity decision.
+    """
+
+    values = pd.Series(
+        series,
+        copy=True,
+    ).dropna().astype(float)
+
+    if len(values) < 20:
+        raise ValueError(
+            "At least 20 observations are required for the ADF test."
+        )
+
+    result = adfuller(
+        values,
+        autolag="AIC",
+    )
+
+    test_statistic = float(result[0])
+    p_value = float(result[1])
+    used_lags = int(result[2])
+    number_observations = int(result[3])
+    critical_values = result[4]
+
+    return {
+        "test_statistic": test_statistic,
+        "p_value": p_value,
+        "used_lags": used_lags,
+        "number_observations": number_observations,
+        "critical_value_1_percent": float(
+            critical_values["1%"]
+        ),
+        "critical_value_5_percent": float(
+            critical_values["5%"]
+        ),
+        "critical_value_10_percent": float(
+            critical_values["10%"]
+        ),
+        "significance_level": significance_level,
+        "is_stationary": p_value < significance_level,
     }

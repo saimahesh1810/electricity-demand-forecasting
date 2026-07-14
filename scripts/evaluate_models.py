@@ -1,6 +1,8 @@
 import pandas as pd
 
 from electricity_demand.config import (
+    FIGURE_DIR,
+    FORECAST_DIR,
     METRICS_DIR,
     SEASONAL_PERIOD,
     TEST_WEEKS,
@@ -17,7 +19,10 @@ from electricity_demand.models.benchmarks import (
     naive_forecast,
     seasonal_naive_forecast,
 )
-
+from electricity_demand.plotting import (
+    plot_forecast_errors,
+    plot_forecasts,
+)
 
 def main() -> None:
     """
@@ -92,6 +97,69 @@ def main() -> None:
         index=False,
     )
 
+    FORECAST_DIR.mkdir(
+        parents=True,
+        exist_ok=True,
+    )
+
+    FIGURE_DIR.mkdir(
+        parents=True,
+        exist_ok=True,
+    )
+
+    forecast_df = pd.DataFrame(
+        {
+            "actual": test,
+        }
+    )
+
+    for name, forecast in forecasts.items():
+        forecast_df[name] = forecast.reindex(
+            test.index
+        )
+
+    forecast_output_path = (
+        FORECAST_DIR
+        / "benchmark_forecasts.csv"
+    )
+
+    forecast_df.to_csv(
+        forecast_output_path
+    )
+
+    forecast_figure = plot_forecasts(
+        train=train,
+        test=test,
+        forecasts=forecasts,
+    )
+
+    forecast_figure_path = (
+        FIGURE_DIR
+        / "benchmark_forecast_comparison.png"
+    )
+
+    forecast_figure.savefig(
+        forecast_figure_path,
+        dpi=300,
+        bbox_inches="tight",
+    )
+
+    error_figure = plot_forecast_errors(
+        y_true=test,
+        forecasts=forecasts,
+    )
+
+    error_figure_path = (
+        FIGURE_DIR
+        / "benchmark_error_diagnostics.png"
+    )
+
+    error_figure.savefig(
+        error_figure_path,
+        dpi=300,
+        bbox_inches="tight",
+    )
+
     print("\nTraining observations:")
     print(len(train))
 
@@ -122,6 +190,21 @@ def main() -> None:
     print(
         f"\nSaved metrics to:\n"
         f"{output_path}"
+    )
+
+    print(
+        f"\nSaved benchmark forecasts to:\n"
+        f"{forecast_output_path}"
+    )
+
+    print(
+        f"\nSaved forecast comparison figure to:\n"
+        f"{forecast_figure_path}"
+    )
+
+    print(
+        f"\nSaved error diagnostics figure to:\n"
+        f"{error_figure_path}"
     )
 
 
