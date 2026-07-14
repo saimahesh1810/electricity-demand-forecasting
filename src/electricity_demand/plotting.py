@@ -7,7 +7,7 @@ import pandas as pd
 import numpy as np
 from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
 from statsmodels.tsa.seasonal import seasonal_decompose
-
+from statsmodels.graphics.gofplots import qqplot
 
 def plot_forecasts(
     train: pd.Series,
@@ -541,4 +541,209 @@ def plot_autocorrelation_diagnostics(
 
     return acf_figure, pacf_figure
 
+def plot_sarima_forecast(
+    train: pd.Series,
+    test: pd.Series,
+    forecast: pd.Series,
+    intervals: pd.DataFrame,
+    train_weeks_to_show: int = 104,
+):
+    """
+    Plot SARIMA forecasts with 95% prediction intervals.
+    """
 
+    aligned_forecast = forecast.reindex(
+        test.index
+    )
+
+    aligned_intervals = intervals.reindex(
+        test.index
+    )
+
+    if aligned_forecast.isna().any():
+        raise ValueError(
+            "SARIMA forecast contains missing values."
+        )
+
+    if aligned_intervals.isna().any().any():
+        raise ValueError(
+            "SARIMA intervals contain missing values."
+        )
+
+    fig, ax = plt.subplots(
+        figsize=(14, 7)
+    )
+
+    train_plot = train.iloc[
+        -train_weeks_to_show:
+    ]
+
+    ax.plot(
+        train_plot.index,
+        train_plot.values,
+        label="Training load",
+        linewidth=1.4,
+    )
+
+    ax.plot(
+        test.index,
+        test.values,
+        label="Actual test load",
+        linewidth=2,
+    )
+
+    ax.plot(
+        aligned_forecast.index,
+        aligned_forecast.values,
+        label="SARIMA forecast",
+        linewidth=1.8,
+    )
+
+    ax.fill_between(
+        aligned_intervals.index,
+        aligned_intervals["lower"],
+        aligned_intervals["upper"],
+        alpha=0.2,
+        label="95% prediction interval",
+    )
+
+    ax.axvline(
+        test.index.min(),
+        linestyle="--",
+        linewidth=1,
+        label="Forecast origin",
+    )
+
+    ax.set_title(
+        "SARIMA Forecast of Weekly German Electricity Demand"
+    )
+
+    ax.set_xlabel("Week")
+
+    ax.set_ylabel(
+        "Average electricity demand (GW)"
+    )
+
+    ax.legend()
+
+    ax.grid(alpha=0.3)
+
+    fig.tight_layout()
+
+    return fig
+
+
+def plot_residual_diagnostics(
+    residuals: pd.Series,
+):
+    """
+    Create residual time-series, histogram, Q-Q and ACF plots.
+    """
+
+    clean_residuals = pd.Series(
+        residuals,
+        copy=True,
+    ).dropna().astype(float)
+
+    if clean_residuals.empty:
+        raise ValueError(
+            "Residual series must not be empty."
+        )
+
+    residual_figure, residual_axis = plt.subplots(
+        figsize=(14, 5)
+    )
+
+    residual_axis.plot(
+        clean_residuals.index,
+        clean_residuals.values,
+        linewidth=1.2,
+    )
+
+    residual_axis.axhline(
+        0,
+        linestyle="--",
+        linewidth=1,
+    )
+
+    residual_axis.set_title(
+        "SARIMA Residuals Over Time"
+    )
+
+    residual_axis.set_xlabel("Week")
+
+    residual_axis.set_ylabel("Residual (GW)")
+
+    residual_axis.grid(alpha=0.3)
+
+    residual_figure.tight_layout()
+
+    histogram_figure, histogram_axis = plt.subplots(
+        figsize=(9, 5)
+    )
+
+    histogram_axis.hist(
+        clean_residuals,
+        bins=25,
+        edgecolor="black",
+        alpha=0.75,
+    )
+
+    histogram_axis.set_title(
+        "Distribution of SARIMA Residuals"
+    )
+
+    histogram_axis.set_xlabel("Residual (GW)")
+
+    histogram_axis.set_ylabel("Frequency")
+
+    histogram_figure.tight_layout()
+
+    qq_figure, qq_axis = plt.subplots(
+        figsize=(7, 7)
+    )
+
+    qqplot(
+        clean_residuals,
+        line="s",
+        ax=qq_axis,
+    )
+
+    qq_axis.set_title(
+        "Q-Q Plot of SARIMA Residuals"
+    )
+
+    qq_figure.tight_layout()
+
+    acf_figure, acf_axis = plt.subplots(
+        figsize=(13, 5)
+    )
+
+    maximum_lags = min(
+        52,
+        len(clean_residuals) // 2 - 1,
+    )
+
+    plot_acf(
+        clean_residuals,
+        lags=maximum_lags,
+        zero=False,
+        ax=acf_axis,
+    )
+
+    acf_axis.set_title(
+        "Autocorrelation of SARIMA Residuals"
+    )
+
+    acf_axis.set_xlabel("Lag in weeks")
+
+    acf_axis.set_ylabel("Autocorrelation")
+
+    acf_figure.tight_layout()
+
+    return {
+        "residual_series": residual_figure,
+        "residual_histogram": histogram_figure,
+        "residual_qq": qq_figure,
+        "residual_acf": acf_figure,
+    }
