@@ -526,5 +526,12 @@ def load_processed_data(
     )
 
     data = data.sort_index()
+    inferred_frequency = pd.infer_freq(
+        data.index
+    )
+    if inferred_frequency is not None:
+        data = data.asfreq(
+            inferred_frequency
+        )
 
     return data
