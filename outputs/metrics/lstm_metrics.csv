@@ -1,0 +1,2 @@
+model,MAE,RMSE,MASE,Bias,sMAPE,forecast_strategy,conditional_forecast,lookback_weeks
+lstm,2.7070637489000315,3.5357788343276613,1.843989059875464,1.1743235640963774,4.968204367921094,recursive_fixed_origin,True,52

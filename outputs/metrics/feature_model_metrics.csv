@@ -1,0 +1,2 @@
+model,MAE,RMSE,MASE,Bias,sMAPE,forecast_strategy,conditional_forecast
+feature_model,2.366798632644389,3.1334398186632515,1.6122083520559274,1.9050667819056175,4.387958252431542,recursive_fixed_origin,True

@@ -15,15 +15,6 @@ data/processed/*
 !data/interim/.gitkeep
 !data/processed/.gitkeep
 
-# Generated outputs
-outputs/figures/*
-outputs/forecasts/*
-outputs/metrics/*
-outputs/model_objects/*
-!outputs/figures/.gitkeep
-!outputs/forecasts/.gitkeep
-!outputs/metrics/.gitkeep
-!outputs/model_objects/.gitkeep
 
 # Jupyter and IDE
 .ipynb_checkpoints/
@@ -38,3 +29,7 @@ outputs/model_objects/*
 # Operating-system files
 Thumbs.db
 .DS_Store
+
+# Large generated model binaries
+outputs/model_objects/*
+!outputs/model_objects/.gitkeep

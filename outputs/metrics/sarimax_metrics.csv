@@ -1,0 +1,2 @@
+model,MAE,RMSE,MASE,Bias,sMAPE,covariate_set,conditional_forecast
+sarimax,4.248010084653803,5.029544927212856,2.893645975468873,4.237124757970344,7.585169567378859,temperature_holiday,True

@@ -1,0 +1,3 @@
+candidate,covariates,aic,bic,converged,stable_forecast,status,error
+temperature_holiday,"temp_mean, holiday_days",264.7944239484122,282.2148785365372,True,True,usable,
+temperature,temp_mean,331.90898063099354,346.8407988493864,True,True,usable,
