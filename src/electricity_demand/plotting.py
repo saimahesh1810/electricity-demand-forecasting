@@ -840,3 +840,55 @@ def plot_sarimax_forecast(
     fig.tight_layout()
 
     return fig
+
+def plot_feature_importance(
+    feature_importance: pd.Series,
+    top_n: int = 20,
+):
+    """
+    Plot the most important feature-model predictors.
+    """
+
+    importance = pd.Series(
+        feature_importance,
+        copy=True,
+    ).dropna()
+
+    if importance.empty:
+        raise ValueError(
+            "Feature importance must not be empty."
+        )
+
+    top_features = (
+        importance
+        .sort_values(
+            ascending=True
+        )
+        .tail(top_n)
+    )
+
+    fig, ax = plt.subplots(
+        figsize=(10, 8)
+    )
+
+    ax.barh(
+        top_features.index,
+        top_features.values,
+    )
+
+    ax.set_title(
+        "Gradient Boosting Feature Importance"
+    )
+
+    ax.set_xlabel("Relative importance")
+
+    ax.set_ylabel("Feature")
+
+    ax.grid(
+        axis="x",
+        alpha=0.3,
+    )
+
+    fig.tight_layout()
+
+    return fig
