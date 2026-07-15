@@ -747,3 +747,96 @@ def plot_residual_diagnostics(
         "residual_qq": qq_figure,
         "residual_acf": acf_figure,
     }
+
+def plot_sarimax_forecast(
+    train: pd.Series,
+    test: pd.Series,
+    forecast: pd.Series,
+    intervals: pd.DataFrame,
+    model_label: str = "SARIMAX",
+    train_weeks_to_show: int = 104,
+):
+    """
+    Plot a SARIMAX conditional forecast with prediction intervals.
+    """
+
+    aligned_forecast = forecast.reindex(
+        test.index
+    )
+
+    aligned_intervals = intervals.reindex(
+        test.index
+    )
+
+    if aligned_forecast.isna().any():
+        raise ValueError(
+            "SARIMAX forecast contains missing values."
+        )
+
+    if aligned_intervals.isna().any().any():
+        raise ValueError(
+            "SARIMAX prediction intervals contain missing values."
+        )
+
+    fig, ax = plt.subplots(
+        figsize=(14, 7)
+    )
+
+    train_plot = train.iloc[
+        -train_weeks_to_show:
+    ]
+
+    ax.plot(
+        train_plot.index,
+        train_plot.values,
+        label="Training load",
+        linewidth=1.4,
+    )
+
+    ax.plot(
+        test.index,
+        test.values,
+        label="Actual test load",
+        linewidth=2,
+    )
+
+    ax.plot(
+        aligned_forecast.index,
+        aligned_forecast.values,
+        label=f"{model_label} forecast",
+        linewidth=1.8,
+    )
+
+    ax.fill_between(
+        aligned_intervals.index,
+        aligned_intervals["lower"],
+        aligned_intervals["upper"],
+        alpha=0.2,
+        label="95% prediction interval",
+    )
+
+    ax.axvline(
+        test.index.min(),
+        linestyle="--",
+        linewidth=1,
+        label="Forecast origin",
+    )
+
+    ax.set_title(
+        f"{model_label} Conditional Forecast of "
+        "Weekly German Electricity Demand"
+    )
+
+    ax.set_xlabel("Week")
+
+    ax.set_ylabel(
+        "Average electricity demand (GW)"
+    )
+
+    ax.legend()
+
+    ax.grid(alpha=0.3)
+
+    fig.tight_layout()
+
+    return fig

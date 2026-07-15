@@ -13,8 +13,10 @@ def fit_sarimax(
     order: tuple[int, int, int] = (1, 0, 1),
     seasonal_order: tuple[int, int, int, int] = (1, 0, 1, 52),
     X_train: pd.DataFrame | None = None,
+    trend: str | None = None,
     enforce_stationarity: bool = False,
     enforce_invertibility: bool = False,
+    maxiter: int = 1000,
 ):
     """
     Fit a SARIMA or SARIMAX model.
@@ -59,7 +61,7 @@ def fit_sarimax(
         exog=exog,
         order=order,
         seasonal_order=seasonal_order,
-        trend=None,
+        trend=trend,
         enforce_stationarity=enforce_stationarity,
         enforce_invertibility=enforce_invertibility,
     )
@@ -68,10 +70,10 @@ def fit_sarimax(
         warnings.simplefilter("ignore")
 
         fitted_model = model.fit(
-            disp=False,
-            maxiter=300,
+          method="lbfgs",
+          disp=False,
+          maxiter=maxiter,
         )
-
     return fitted_model
 
 
@@ -330,16 +332,8 @@ def is_stable_forecast(
     y_train: pd.Series,
 ) -> bool:
     """
-    Check whether a SARIMA forecast is numerically usable.
-
-    The forecast is accepted when:
-    1. Point forecasts are finite.
-    2. Prediction intervals are finite.
-    3. Lower bounds do not exceed upper bounds.
-    4. Forecast magnitudes are not catastrophically large.
-
-    Wide prediction intervals are not automatically rejected because
-    uncertainty can grow substantially over a 104-week horizon.
+    Check that forecasts are finite and within a broadly plausible
+    range for the observed electricity-demand series.
     """
 
     forecast_values = np.asarray(
@@ -361,25 +355,25 @@ def is_stable_forecast(
     if (intervals["lower"] > intervals["upper"]).any():
         return False
 
-    training_values = np.asarray(
-        y_train,
-        dtype=float,
+    train_min = float(y_train.min())
+
+    train_max = float(y_train.max())
+
+    train_range = train_max - train_min
+
+    plausible_lower = max(
+        0.0,
+        train_min - 2 * train_range,
     )
 
-    training_max = float(
-        np.max(np.abs(training_values))
+    plausible_upper = (
+        train_max + 2 * train_range
     )
 
-    # Reject only catastrophic numerical explosions.
-    magnitude_limit = max(
-        training_max * 100,
-        1000.0,
-    )
+    if forecast_values.min() < plausible_lower:
+        return False
 
-    if (
-        np.abs(forecast_values)
-        > magnitude_limit
-    ).any():
+    if forecast_values.max() > plausible_upper:
         return False
 
     return True
