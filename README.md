@@ -87,6 +87,8 @@ Rolling features were calculated from a one-week-shifted target:
 
 ```python
 past_target = target_series.shift(1)
+``` 
+
 For recursive Gradient Boosting and LSTM forecasts, earlier predictions were inserted into later model inputs. Actual test-period demand was never used to create future lag features.
 
 Conditional weather forecasts
@@ -96,7 +98,7 @@ Realised test-period weather was supplied to SARIMAX, Gradient Boosting and LSTM
 These results are therefore conditional forecasts. In an operational system, future observed temperature would need to be replaced by weather forecasts or weather scenarios.
 
 Repository Structure
-
+```
 electricity-demand-forecasting/
 │
 ├── data/
@@ -142,78 +144,118 @@ electricity-demand-forecasting/
 ├── environment.yml
 ├── pyproject.toml
 └── README.md
+```
 
-Installation
+## Installation
 
 Clone the repository:
+```
 git clone https://github.com/saimahesh1810electricity-demand-forecasting.git
 cd electricity-demand-forecasting
+```
 
-Create a virtual environment:
-
+## Create a virtual environment:
+```
 python -m venv .venv
+```
 
-Activate it on Windows:
-
+## Activate it on Windows:
+```
 .venv\Scripts\Activate.ps1
+``` 
 
-Install the project and dependencies:
-
+## Install the project and dependencies:
+```
 pip install -e .
 pip install -r requirements.txt
-Running the Project
+```
+## Running the Project
 Download the data
+```
 python scripts/download_data.py
-Create the processed dataset and exploratory outputs
+```
+## Create the processed dataset and exploratory outputs
+```
 python scripts/make_features.py
-Run benchmark models
+```
+
+## Run benchmark models
+```
 python scripts/evaluate_models.py
-Run SARIMA
+```
+## Run SARIMA
+```
 python scripts/run_sarima.py
-Run SARIMAX
+```
+
+## Run SARIMAX
+```
 python scripts/run_sarimax.py
-Run Gradient Boosting
+```
+
+## Run Gradient Boosting
+```
 python scripts/run_feature_model.py
-Run LSTM
+```
+## Run LSTM
+```
 python scripts/run_neural.py
-Run the complete pipeline
+```
+
+## Run the complete pipeline
+```
 python scripts/run_pipeline.py
-Build the final model comparison only
+```
+
+## Build the final model comparison only
+```
 python scripts/run_pipeline.py --comparison-only
-Testing
+```
 
-Run the complete test suite:
+## Testing
 
+### Run the complete test suite:
+```
 pytest -v
-
-The tests cover:
+```
+## The tests cover:
 
 evaluation metrics;
 benchmark forecasts;
 leakage-safe lag and rolling features;
 LSTM sequence creation;
 pipeline behaviour.
-Key Outputs
+
+### Key Outputs
 Final metrics
 outputs/metrics/model_comparison.csv
 Final comparison figure
 outputs/figures/model_comparison.png
 Model forecasts
 outputs/forecasts/
-Full report
+
+### Full report
 reports/Electricity Demand Forecasting Report (24069723).pdf
-Key Findings
+
+### Key Findings
 Annual seasonality was the dominant forecasting signal.
+
 Seasonal naïve was difficult to outperform.
+
 Gradient Boosting produced the best numerical accuracy.
+
 Its improvement over seasonal naïve was small.
+
 SARIMA captured annual behaviour but retained shorter-term residual autocorrelation.
+
 SARIMAX produced clean residuals but poor out-of-sample accuracy and high positive bias.
+
 LSTM produced plausible forecasts but overfitted because of limited training sequences.
+
 Greater model complexity did not automatically produce better forecasts.
 Future Improvements
 
-Possible extensions include:
+## Possible extensions include:
 
 rolling-origin evaluation;
 weather forecasts instead of realised temperatures;
@@ -222,7 +264,8 @@ longer historical datasets;
 hourly or daily modelling;
 conformal or quantile prediction intervals for machine-learning models;
 explicit treatment of structural breaks and unusual events.
-Author
+
+### Author
 
 Sai Mahesh Battula
 Student ID: 24069723
